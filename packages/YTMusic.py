@@ -1,6 +1,5 @@
 from ytmusicapi import YTMusic
-import multiprocessing as mp
-from tqdm import tqdm
+from difflib import SequenceMatcher
 
 class yt():
     def __init__(self) -> None:
@@ -8,16 +7,7 @@ class yt():
         self.missing = []
         self.currentID = 0
         self.ids = []
-
-    def findSingles(self, query):
-        for item in tqdm(query):
-            result = self.yt.search(item, filter='songs')
-            if result: 
-                #print(result[0]['videoId'])
-                self.ids.append(result[0]['videoId'])
-            else: 
-                self.missing.append(item)
-                False
+        self.added = []
 
     def createPlaylist(self, name):
         self.currentID = self.yt.create_playlist(name, description='')
@@ -27,13 +17,42 @@ class yt():
         self.currentID = id
 
     def addSongs(self):
-        self.yt.add_playlist_items(self.currentID, self.ids)     
+        # print(self.ids)
+        self.yt.add_playlist_items(self.currentID, self.ids, duplicates=True)  
+
+    def findSingle(self, item, threshold = 2.5):
+        result = self.yt.search(rf'{item[0]}', filter='songs')
+        ratio = 0
+        for v in result:
+            comparison_0 = rf'{item[0]} {item[1]}'
+            check = rf"{v['title']} {v['artists'][0]['name']} {v['duration_seconds']}"
+            
+            comparison_time = item[1]
+            check_time = float(v['duration_seconds'])
+
+            ratio_time = check_time/comparison_time
+            if ratio_time > 1: ratio_time = ratio_time**-1
+
+            new_ratio = SequenceMatcher(None, comparison_0, check).ratio()
+            if 2*new_ratio+ratio_time > ratio:
+                ratio = 2*new_ratio+ratio_time
+                cand = v
+
+        if ratio > threshold:
+            return (cand['videoId'], f"{cand['title']} {cand['artists'][0]['name']} {cand['duration_seconds']}")
+        else: return ('NF', f"NF {cand['title']} {cand['artists'][0]['name']}")
+
+    def addID(self, id):
+        self.ids.append(id)       
+
+    def addMissing(self, id):
+        self.missing.append(id)
 
     def getMissing(self):
-        return self.missing
-    
+        print(self.missing)
 
 if __name__ == '__main__':
     run = yt()
-    run.createPlaylist('Test123')
-    run.getYT('Peter Fox Haus am See Stadtaffe')
+    #run.createPlaylist('Test123')
+    print(run.findSingle(('Halt dein Maul Y-Titty', 218)))
+    print(1)
