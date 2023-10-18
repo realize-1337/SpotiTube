@@ -20,7 +20,7 @@
       <item row="1" column="0">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -31,11 +31,30 @@
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
              <widget class="QTableWidget" name="tableWidget">
-              <row>
-               <property name="text">
-                <string>1</string>
-               </property>
-              </row>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="lineWidth">
+               <number>1</number>
+              </property>
+              <property name="horizontalScrollBarPolicy">
+               <enum>Qt::ScrollBarAsNeeded</enum>
+              </property>
+              <property name="sizeAdjustPolicy">
+               <enum>QAbstractScrollArea::AdjustToContents</enum>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+              <attribute name="horizontalHeaderDefaultSectionSize">
+               <number>35</number>
+              </attribute>
+              <attribute name="horizontalHeaderStretchLastSection">
+               <bool>false</bool>
+              </attribute>
               <column>
                <property name="text">
                 <string>Title</string>
@@ -56,11 +75,6 @@
                 <string>Duration</string>
                </property>
               </column>
-              <item row="0" column="0">
-               <property name="text">
-                <string>Last Resort</string>
-               </property>
-              </item>
              </widget>
             </item>
            </layout>
@@ -145,14 +159,29 @@
                 <bold>true</bold>
                </font>
               </property>
+              <property name="autoFillBackground">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Found Playlist</string>
               </property>
               <property name="textFormat">
                <enum>Qt::AutoText</enum>
               </property>
+              <property name="scaledContents">
+               <bool>false</bool>
+              </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+              <property name="margin">
+               <number>0</number>
+              </property>
+              <property name="indent">
+               <number>0</number>
               </property>
               <property name="textInteractionFlags">
                <set>Qt::LinksAccessibleByMouse</set>
@@ -171,13 +200,31 @@
           <item row="0" column="0">
            <widget class="QProgressBar" name="ytProgress">
             <property name="value">
-             <number>24</number>
+             <number>0</number>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
            <layout class="QGridLayout" name="gridLayout_6">
             <item row="0" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <item>
+               <widget class="QPushButton" name="reloadYT">
+                <property name="text">
+                 <string>Reload Results</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="commitYT">
+                <property name="text">
+                 <string>Commit to YT Music</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="0">
              <widget class="QScrollArea" name="scrollArea">
               <property name="widgetResizable">
                <bool>true</bool>
@@ -188,12 +235,24 @@
                  <x>0</x>
                  <y>0</y>
                  <width>1229</width>
-                 <height>903</height>
+                 <height>839</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_3">
                 <item>
                  <widget class="QTableWidget" name="tableWidget_2">
+                  <property name="editTriggers">
+                   <set>QAbstractItemView::NoEditTriggers</set>
+                  </property>
+                  <property name="gridStyle">
+                   <enum>Qt::SolidLine</enum>
+                  </property>
+                  <property name="sortingEnabled">
+                   <bool>true</bool>
+                  </property>
+                  <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+                   <bool>true</bool>
+                  </attribute>
                   <attribute name="horizontalHeaderStretchLastSection">
                    <bool>true</bool>
                   </attribute>
@@ -222,6 +281,20 @@
                </layout>
               </widget>
              </widget>
+            </item>
+            <item row="1" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>Playlist Name</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="playlistNameYT"/>
+              </item>
+             </layout>
             </item>
            </layout>
           </item>

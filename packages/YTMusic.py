@@ -1,5 +1,6 @@
-from ytmusicapi import YTMusic
+from ytmusicapi import YTMusic, setup_oauth
 from difflib import SequenceMatcher
+import pandas as pd
 
 class yt():
     def __init__(self) -> None:
@@ -51,8 +52,53 @@ class yt():
     def getMissing(self):
         print(self.missing)
 
+    def findTables(self, title:str, artist:str, duration:int, count:int=20, filter:str='songs'):
+        ids = []
+        titles = []
+        artists = []
+        matchRatios = []
+        query = rf"{title} {artist}"
+        result = self.yt.search(f"{query}", filter=f"{filter}")
+        for v in result:
+            if v['title'] and v['artists'][0]['name'] and v['duration']:
+                if rf"{v['videoId']}" not in ids:
+                    ids.append(rf"{v['videoId']}")
+                else: continue
+                titles.append(rf"{v['title']}")
+                artists.append(rf"{v['artists'][0]['name']}")
+
+
+                comparison_0 = rf"{title} {artist} {duration}"
+                check = rf"{v['title']} {v['artists'][0]['name']} {v['duration_seconds']}"
+                check_time = float(v['duration_seconds'])
+                ratio_time = check_time/float(duration)
+                if ratio_time > 1: ratio_time = ratio_time**-1
+
+                new_ratio = SequenceMatcher(None, comparison_0, check).ratio()
+                matchRatios.append((2*new_ratio+ratio_time)/3)       
+            
+        ids.append('NULL')
+        ids.insert(0, 'target')
+        titles.append('NULL')
+        titles.insert(0, rf"{title}")
+        artists.append('NULL')
+        artists.insert(0, rf"{artist}")
+        matchRatios.append(0)
+        matchRatios.insert(0, 2)
+        data = {
+            'title': titles,
+            'artist': artists,
+            'matchRatio': matchRatios
+        }
+        df = pd.DataFrame(index=ids, data=data)
+        df = df.sort_values('matchRatio', ascending=False)
+        df = df.transpose()
+        df = df.to_dict()
+        return df
+
 if __name__ == '__main__':
     run = yt()
     #run.createPlaylist('Test123')
-    print(run.findSingle(('Halt dein Maul Y-Titty', 218)))
+    #print(run.findSingle(('Halt dein Maul Y-Titty', 218)))
+    run.findTables('Halt dein Maul', 'Y-Titty', '212')
     print(1)

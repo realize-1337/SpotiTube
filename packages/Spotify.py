@@ -42,10 +42,23 @@ class sp():
             self.taken.append(f"{v['name']} {v['artists']} {v['duration']}")
         return query
     
+    def songDict(self) -> dict: 
+        dict = {}
+        for key, value in self.tracks.items():
+            dict[f"{key}"] = {
+                'title': f"{value['name']}",
+                'artist': f"{value['artists']}",
+                'album': f"{value['album']}",
+                'duration': f"{value['duration']}"
+            }
+
+        return dict
+
 
 if __name__ == "__main__":
     sp = sp()
     tracks = sp.getPlaylist('04xpedGXCtq4W9zdkCEvZq')  
+    dict = sp.songDict()
     print(sp.createQuery())
 
 
