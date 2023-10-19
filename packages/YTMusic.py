@@ -3,8 +3,8 @@ from difflib import SequenceMatcher
 import pandas as pd
 
 class yt():
-    def __init__(self) -> None:
-        self.yt = YTMusic('packages/oauth.json')
+    def __init__(self, path) -> None:
+        self.yt = YTMusic(path)
         self.missing = []
         self.currentID = 0
         self.ids = []
@@ -12,7 +12,9 @@ class yt():
 
     def createPlaylist(self, name):
         self.currentID = self.yt.create_playlist(name, description='')
+        id = self.currentID
         print('Playlist created!')
+        return id
 
     def setPlaylistID(self, id):
         self.currentID = id
@@ -68,8 +70,8 @@ class yt():
                 artists.append(rf"{v['artists'][0]['name']}")
 
 
-                comparison_0 = rf"{title} {artist} {duration}"
-                check = rf"{v['title']} {v['artists'][0]['name']} {v['duration_seconds']}"
+                comparison_0 = rf"{title} {artist} {duration}".lower()
+                check = rf"{v['title']} {v['artists'][0]['name']} {v['duration_seconds']}".lower()
                 check_time = float(v['duration_seconds'])
                 ratio_time = check_time/float(duration)
                 if ratio_time > 1: ratio_time = ratio_time**-1
@@ -97,8 +99,9 @@ class yt():
         return df
 
 if __name__ == '__main__':
-    run = yt()
+    run = yt('packages/oauth.json')
     #run.createPlaylist('Test123')
     #print(run.findSingle(('Halt dein Maul Y-Titty', 218)))
-    run.findTables('Halt dein Maul', 'Y-Titty', '212')
+    # run.findTables('Halt dein Maul', 'Y-Titty', '212')
+    run.createPlaylist('Test')
     print(1)

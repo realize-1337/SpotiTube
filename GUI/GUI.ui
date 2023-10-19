@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>SpotiTube</class>
+ <widget class="QMainWindow" name="SpotiTube">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>SpotiTube</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
@@ -53,7 +53,7 @@
                <number>35</number>
               </attribute>
               <attribute name="horizontalHeaderStretchLastSection">
-               <bool>false</bool>
+               <bool>true</bool>
               </attribute>
               <column>
                <property name="text">
@@ -148,6 +148,18 @@
             </item>
             <item>
              <widget class="QLabel" name="spFound">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>16</height>
+               </size>
+              </property>
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
@@ -162,6 +174,12 @@
               <property name="autoFillBackground">
                <bool>false</bool>
               </property>
+              <property name="frameShadow">
+               <enum>QFrame::Sunken</enum>
+              </property>
+              <property name="lineWidth">
+               <number>0</number>
+              </property>
               <property name="text">
                <string>Found Playlist</string>
               </property>
@@ -169,7 +187,7 @@
                <enum>Qt::AutoText</enum>
               </property>
               <property name="scaledContents">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -336,7 +354,7 @@
    </widget>
    <widget class="QMenu" name="menuWindow_2">
     <property name="title">
-     <string>&amp;Info</string>
+     <string>Info</string>
     </property>
    </widget>
    <addaction name="menuMain"/>

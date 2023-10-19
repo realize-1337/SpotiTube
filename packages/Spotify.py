@@ -4,8 +4,8 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import json
 
 class sp():
-    def __init__(self) -> None:
-        with open('packages/keys.json', 'r') as f:
+    def __init__(self, path) -> None:
+        with open(path, 'r') as f:
             keys = json.load(f)
         self.auth_manager = SpotifyClientCredentials(client_id=keys['client_id'], client_secret=keys['client_secret'])
         self.sp = spotipy.Spotify(auth_manager=self.auth_manager)
@@ -51,12 +51,12 @@ class sp():
                 'album': f"{value['album']}",
                 'duration': f"{value['duration']}"
             }
-
+        self.tracks.clear()
         return dict
 
 
 if __name__ == "__main__":
-    sp = sp()
+    sp = sp('packages/keys.json')
     tracks = sp.getPlaylist('04xpedGXCtq4W9zdkCEvZq')  
     dict = sp.songDict()
     print(sp.createQuery())

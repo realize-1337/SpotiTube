@@ -1,64 +1,27 @@
-import typing
+import os
+import sys
 from PyQt6.QtWidgets import *
 from PyQt6 import QtCore, QtGui
-from PyQt6.QtCore import Qt, QRunnable, QThreadPool, pyqtSignal, QObject, QThread
+from PyQt6.QtCore import QRunnable, QThreadPool, pyqtSignal, QObject
 import subprocess
 from functools import partial
 import packages.Spotify as sp
 import packages.YTMusic as yt
+import ytmusicapi.auth.oauth as ytmoauth
 from difflib import SequenceMatcher
 import re
-from time import sleep
+import requests
+import webbrowser
+import json
 import logging
 UI_FILE = './GUI/GUI.ui'
 PY_FILE = './GUI/gui.py'
 subprocess.run(['pyuic6', '-x', UI_FILE, '-o', PY_FILE])
-from GUI.gui import Ui_MainWindow
-
-options = {
-    'song_1':{
-        'target': {
-            'title': 'Last Resort',
-            'artist': 'Papa Roach'
-        },
-        'id_0': {
-            'title': 'Last Resort Remix',
-            'artist': 'Papa Roach',
-            'matchRatio': '0.85'
-            }, 
-        'id_1': {
-            'title': 'Last Resort (Karaoke)',
-            'artist': 'Papa Roach',
-            'matchRatio': '0.75'
-            },
-        'id_2': {
-            'title': 'Last Resort',
-            'artist': 'Papa Roach',
-            'matchRatio': '1.0'
-        }
-    },
-    'song_2':{
-        'target': {
-            'title': 'Last Resort 2',
-            'artist': 'Papa Roach'
-        },
-        'id_0': {
-            'title': 'Last Resort Remix 2',
-            'artist': 'Papa Roach',
-            'matchRatio': '0.88'
-            }, 
-        'id_1': {
-            'title': 'Last Resort (Karaoke) 2',
-            'artist': 'Papa Roach',
-            'matchRatio': '0.99'
-            },
-        'id_2': {
-            'title': 'Last Resort 2',
-            'artist': 'Papa Roach',
-            'matchRatio': '1.1'
-        }
-    }  
-}
+UI_FILE_settings = './GUI/settings.ui'
+PY_FILE_settings = './GUI/settings.py'
+subprocess.run(['pyuic6', '-x', UI_FILE_settings, '-o', PY_FILE_settings])
+from GUI.gui import Ui_SpotiTube as mainSpotiTube
+from GUI.settings import Ui_SpotiTube as settingSpotiTube
 
 class WorkerSignals(QObject):
     push = pyqtSignal(dict)
@@ -66,34 +29,51 @@ class WorkerSignals(QObject):
 
 class Worker(QRunnable):
 
-    def __init__(self, list):
+    def __init__(self, list, path):
         super().__init__()
         self.list = list
+        self.path = os.path.join(path, 'oauth.json')
         self.signals = WorkerSignals()
 
     def run(self):
         try:
-            ytm = yt.yt()
+            ytm = yt.yt(self.path)
             result = ytm.findTables(self.list[0], self.list[1], duration=int(self.list[2]), count=int(self.list[3]), filter=self.list[4])
             self.signals.push.emit(result)
         finally:
             self.signals.finished.emit()
 
 class UI(QMainWindow):
-    global ytDict
-    def __init__(self):
+    def __init__(self, alternativePath:str=None):
         super().__init__()
-
-        self.ui = Ui_MainWindow()
-        self.sp = sp.sp()
+        self.ui = mainSpotiTube()
         self.ui.setupUi(self)
-        #self.tableYT(options)
+        if alternativePath: self.path = alternativePath
+        else: self.path = str(os.path.expanduser('~\\Documents\\SpotiTube'))
+        self.code:dict
+        self.oauth = ytmoauth.YTMusicOAuth(requests.Session())
+        
+        if not os.path.isdir(self.path) or not os.path.exists(os.path.join(self.path, 'keys.json')) or not os.path.exists(os.path.join(self.path, 'oauth.json')): 
+            if not os.path.isdir(self.path): os.mkdir(self.path, mode=777)
+            self.ytLoginState = False
+            self.spKeyState = False
+            self.settings()
+        else:
+            self.ytLoginState = True
+            self.spKeyState = True
+            self.loadSetting()
+        self.spPath = os.path.join(self.path, 'keys.json')
+        self.sp = sp.sp(self.spPath)
         self.ui.spFound.setText('Enter Playlist ID or link')
         self.ui.spSearch.clicked.connect(self.getSpotifyPlaylist)
+        self.ui.spId.returnPressed.connect(self.getSpotifyPlaylist)
+        self.ui.playlistNameYT.returnPressed.connect(self.createPlaylist)
         self.spDict = {}
         self.spChange = False
         self.ui.ytProgress.setValue(0)
-        self.ui.tabWidget.currentChanged.connect(self.tabChange)
+        self.ui.tabWidget.currentChanged.connect(self.createYTdict)
+        self.ui.menuWindow_2.aboutToShow.connect(self.softwareInfo)
+        self.ui.action_Settings.triggered.connect(self.settings)
         self.ui.reloadYT.clicked.connect(self.createYTdict)
         self.ui.commitYT.clicked.connect(self.createPlaylist)
         self.ytDict = {}
@@ -101,7 +81,7 @@ class UI(QMainWindow):
         self.finished = 0
         self.items=[]
         self.progressActual = 0.0
-
+        
     def getSpotifyPlaylist(self):
         # Set Zero State
         self.ytDict = {}
@@ -110,15 +90,19 @@ class UI(QMainWindow):
         self.items=[]
         self.progressActual = 0.0
         self.spDict = {}
-
-        # Missing: Regex
-
+        header = []
+        self.ui.tableWidget.setRowCount(0)
+        for item in range(self.ui.tableWidget.columnCount()):
+            header.append(self.ui.tableWidget.takeHorizontalHeaderItem(item).text())
+        self.ui.tableWidget.clear()
+        self.ui.tableWidget.setHorizontalHeaderLabels(header)
+           
         regex_pattern = r'https://open.spotify.com/playlist/(\w+)(?:\?si=\w+)?|(\w+)'
         
-
         self.ui.spFound.setText('Loading Playlist Items ...')
         try:
             id = self.ui.spId.text()
+            if not id: raise ValueError
             match = re.search(regex_pattern, id)
             id = match.group(1) or match.group(2)
         except:
@@ -161,6 +145,7 @@ class UI(QMainWindow):
         self.createYTdict()
     
     def tableYT(self, options:dict):
+        self.ui.ytProgress.setValue(100)
         for k, v in options.items():
             row_count = self.ui.tableWidget_2.rowCount()
             self.ui.tableWidget_2.insertRow(row_count)
@@ -194,6 +179,10 @@ class UI(QMainWindow):
             c_box = self.ui.tableWidget_2.cellWidget(row_count, 3)
             combo_box.currentTextChanged.connect(partial(self.update_YT_table, matchRatioCell, c_box))
 
+            self.ui.tableWidget_2.resizeColumnToContents(0)
+            self.ui.tableWidget_2.resizeColumnToContents(1)
+            self.ui.tableWidget_2.resizeColumnToContents(2)
+
     def update_YT_table(self, matchCell, combo_box):
         selected_key = combo_box.currentIndex()
         selected_value = combo_box.itemData(selected_key)
@@ -210,10 +199,6 @@ class UI(QMainWindow):
             self.items = items
             self.run_threads(items)
 
-    def tabChange(self):
-        sleep(1)
-        self.createYTdict()
-
     def threadComplete(self):
         logging.info('Thread finished')
 
@@ -225,7 +210,7 @@ class UI(QMainWindow):
         self.ui.ytProgress.setValue(0)
         for item in items:
             print(item)
-            worker = Worker(item)
+            worker = Worker(item, self.path)
             worker.signals.push.connect(self.merger)
             worker.signals.finished.connect(self.threadComplete)
             threadpool.start(worker)
@@ -248,8 +233,8 @@ class UI(QMainWindow):
             if id == 'NULL': continue
             else: ids.append(id)
 
-        ytm = yt.yt()
-        playlistId = ytm.createPlaylist(self.ui.playlistNameYT.text())
+        ytm = yt.yt(os.path.join(self.path, 'oauth.json'))
+        self.playlistId = ytm.createPlaylist(self.ui.playlistNameYT.text())
         ytm.ids = ids
         try: 
             ytm.addSongs()
@@ -261,17 +246,96 @@ class UI(QMainWindow):
         if success:
             newbox.setText('<b>Successfully created Playlist</b>')
             newbox.setWindowTitle('Success')
+            url = rf"https://music.youtube.com/playlist?list={self.playlistId}"
+            webbrowser.open(url, 2)
         else:
             newbox.setText('<b>Something went wrong</b>')
             newbox.setWindowTitle('Error')
-
+        newbox.setTextFormat(QtCore.Qt.TextFormat.RichText)
+        # newbox.setWindowIcon(QtGui.QIcon('assets/VC_Logo.ico'))
+        newbox.exec() 
+              
+    def softwareInfo(self):
+        newbox = QMessageBox()
+        newbox.setText('<b>Spotify to YT Music Playlist Converter</b><br><br> <a href="https://github.com/realize-1337/SpotiyTube">© 2023 David \'rEaliZe\' M.</a>')
+        newbox.setWindowTitle('Info')
         newbox.setTextFormat(QtCore.Qt.TextFormat.RichText)
         # newbox.setWindowIcon(QtGui.QIcon('assets/VC_Logo.ico'))
         newbox.exec()
+    
+    def settings(self):
+        self.ui.centralwidget.setDisabled(True)
+        dialog = QDialog()
+        dialog.ui = settingSpotiTube()
+        dialog.ui.setupUi(dialog)
+        dialog.ui.spSecret.setEchoMode(QLineEdit.EchoMode.Password)
+        dialog.ui.settingsButtons.accepted.connect(partial(self.settingsAccepted, dialog))
+        dialog.ui.settingsButtons.rejected.connect(partial(self.settingsDeclined, dialog))
+        dialog.ui.ytLogin.clicked.connect(partial(self.loginToYTM, dialog))
+        if self.ytLoginState == True: 
+            dialog.ui.label_5.setText('Already logged in')
+            dialog.ui.ytLogin.setText('Press button to renew login')
+        else: dialog.ui.label_5.setText('Press the button above to login')
+
+        if self.spKeyState == True:
+            id, sc = self.loadSetting()
+            dialog.ui.spKey.setText(f"{id}")
+            dialog.ui.spSecret.setText(f"{sc}")
+        dialog.show()
+        dialog.exec()
+        
+        self.ui.centralwidget.setDisabled(False)
+        
+    def settingsAccepted(self, dialog):
+        spKey = dialog.ui.spKey.text()
+        spSecret = dialog.ui.spSecret.text()
+        dict = {
+            'client_id': spKey,
+            'client_secret': spSecret
+        }
+        if not os.path.exists(os.path.join(self.path, 'keys.json')): 
+            with open(os.path.join(self.path, 'keys.json'), encoding="utf8", mode="x+") as file:
+                json.dump(dict, file, indent=True)
+        else:
+            with open(os.path.join(self.path, 'keys.json'), encoding="utf8", mode="w+") as file:
+                json.dump(dict, file, indent=True)
+                
+        self.sp = sp.sp(os.path.join(self.path, 'keys.json'))
+        dialog.close()
+
+    def settingsDeclined(self, dialog):
+        print('NO')
+        dialog.close()
+
+    def loginToYTM(self, dialog):
+        dialog.ui.ytLogin.setText('Press this Button after you logged in')
+        dialog.ui.ytLogin.clicked.disconnect()
+        dialog.ui.ytLogin.clicked.connect(partial(self.afterLogin, dialog))
+        if not os.path.isdir(self.path):
+            os.mkdir(self.path, mode=777)
+        self.code = self.oauth.get_code()
+        url = f"{self.code['verification_url']}?user_code={self.code['user_code']}"
+        dialog.ui.ytLogin.setText(f'Press this Button after you logged in! Login-Code: {self.code["user_code"]}')
+        webbrowser.open(url)
+
+    def afterLogin(self, dialog):
+        token = self.oauth.get_token_from_code(self.code["device_code"])
+        if len(self.path) > 255:
+            return
+        with open(os.path.join(self.path, 'oauth.json'), encoding="utf8", mode="w+") as file:
+            json.dump(token, file, indent=True)
+
+    def loadSetting(self):
+        with open(os.path.join(self.path, 'keys.json'), mode='r+') as oauth:
+            self.spKeyState = True
+            keys = json.load(oauth)
+            return(keys['client_id'], keys['client_secret'])
 
 
 if __name__ == '__main__':
+    alternativePath = None
+    if len(sys.argv) > 1: alternativePath = os.path.abspath(sys.argv[1]) 
     app = QApplication([])
-    window = UI()
+    window = UI(alternativePath)
     window.show()
     app.exec()
