@@ -155,3 +155,4 @@ cython_debug/
 /packages/keys.json
 /packages/oauth.json
 .vscode/launch.json
+/SpotiToTube_V0.1.exe
