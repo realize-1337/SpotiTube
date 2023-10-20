@@ -8,12 +8,12 @@
 However, I did not quite like their approach and wanted to create my own tool. I actually didn’t really took a deeper look into their code, thus their might be some similarities between our creations.</p>
 <h2 id="contents">Contents</h2>
 <ol>
-<li><a href="##Setup">Setup</a><br>
-1.1. <a href="###%20Compiled%20Build">Compiled Build</a><br>
-1.2. <a href="###%20Compile%20it%20on%20your%20own">Compile yourself</a><br>
-1.3. <a href="###%20Run%20without%20compiling">Without compiling</a></li>
-<li><a href="##Usage">Usage</a></li>
-<li><a href="##Know%20Issues">Known issues</a></li>
+<li><a href="setup">Setup</a><br>
+1.1. <a href="compiled-build">Compiled Build</a><br>
+1.2. <a href="compile-it-on-your-own">Compile yourself</a><br>
+1.3. <a href="run-without-compiling">Without compiling</a></li>
+<li><a href="usage">Usage</a></li>
+<li><a href="known-issues">Known issues</a></li>
 </ol>
 <h2 id="setup">Setup</h2>
 <p>There are basically three ways to use this tool:</p>
