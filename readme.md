@@ -5,7 +5,7 @@ However, I did not quite like their approach and wanted to create my own tool. I
 
 ## Contents
 
- 1. [Setup](#setup)
+ 1. [Setup](#setup)<br>
 	 1.1. [Compiled Build](#compiled-build) 
 	 1.2. [Compile yourself](#compile-it-on-your-own)
 	 1.3. [Without compiling](#run-without-compiling)
