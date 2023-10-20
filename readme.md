@@ -5,14 +5,14 @@ However, I did not quite like their approach and wanted to create my own tool. I
 
 ## Contents
 
- 1. [Setup](##setup)
-	 1.1. [Compiled Build](###%20Compiled%20Build) 
-	 1.2. [Compile yourself](###%20Compile%20it%20on%20your%20own)
-	 1.3. [Without compiling](###%20Run%20without%20compiling)
-2. [Usage](##Usage)
-3. [Known issues](##issues)
+ 1. [Setup](#setup)
+	 1.1. [Compiled Build](#compiled-build) 
+	 1.2. [Compile yourself](#compile-it-on-your-own)
+	 1.3. [Without compiling](#run-without-compiling)
+2. [Usage](#usage)
+3. [Known issues](#known-issues)
 
-## Setup [](##setup)
+## Setup
 
 There are basically three ways to use this tool:
 
@@ -62,5 +62,5 @@ If you are ready to move the playlist, just hit 'Commit to YT Music'. If success
 The Match Ratio is calculated from the similarities between the Spotify and YouTube Items. For each Spotify song, up to 20 YouTube Songs are searched. Each song is compared by title, artist and duration. The closer the songs are together, the higher is the similarity. Usually, a Match Ratio >= 0.8 indicates a good result. 
 66 % of the Match Ratio are due to title + artist similarities, while the remaining 33 % are from the duration similarities. 
 
-## Known Issues [](##issues)
+## Known Issues
 At the moment only public playlists can be copied. I am planning to add private playlists later on. You can work around it by simply putting the playlist public for a spit second, start the import of the playlist data, wait for it to finish and then set it to private again. The link stays the same the whole time. 
