@@ -1,8 +1,8 @@
 import subprocess
 import os
 
-PROJECTNAME = 'SpotiToTube'
-VERSION = '0.1'
+PROJECTNAME = 'SpotiTube'
+VERSION = 'alpha'
 AUTHOR = 'David \'rEaliZe\' M.'
 
 # Aktualisiere die Abhängigkeiten mit 'pip freeze'

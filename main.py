@@ -14,12 +14,12 @@ import requests
 import webbrowser
 import json
 import logging
-UI_FILE = './GUI/GUI.ui'
-PY_FILE = './GUI/gui.py'
-subprocess.run(['pyuic6', '-x', UI_FILE, '-o', PY_FILE])
-UI_FILE_settings = './GUI/settings.ui'
-PY_FILE_settings = './GUI/settings.py'
-subprocess.run(['pyuic6', '-x', UI_FILE_settings, '-o', PY_FILE_settings])
+# UI_FILE = './GUI/GUI.ui'
+# PY_FILE = './GUI/gui.py'
+# subprocess.run(['pyuic6', '-x', UI_FILE, '-o', PY_FILE])
+# UI_FILE_settings = './GUI/settings.ui'
+# PY_FILE_settings = './GUI/settings.py'
+# subprocess.run(['pyuic6', '-x', UI_FILE_settings, '-o', PY_FILE_settings])
 from GUI.gui import Ui_SpotiTube as mainSpotiTube
 from GUI.settings import Ui_SpotiTube as settingSpotiTube
 
